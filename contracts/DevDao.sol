@@ -1,0 +1,3 @@
+contract DevDao{
+  function() payable {}
+}
