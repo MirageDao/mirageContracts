@@ -7,44 +7,54 @@
       "type": "fallback"
     }
   ],
-  "bytecode": "0x6080604052348015600f57600080fd5b50603280601d6000396000f30060806040520000a165627a7a72305820c8cff1d045b9b0c0abd36aefb52d27e06832a3a72faf9f0648080d9592fcba7e0029",
-  "deployedBytecode": "0x60806040520000a165627a7a72305820c8cff1d045b9b0c0abd36aefb52d27e06832a3a72faf9f0648080d9592fcba7e0029",
-  "sourceMap": "0:42:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;0:42:0;;;;;;;",
-  "deployedSourceMap": "0:42:0:-;;;",
-  "source": "contract DevDao{\n  function() payable {}\n}\n",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603280601d6000396000f30060806040520000a165627a7a72305820541804eb461322b71291e33b91d2c4079b753d761371e5c29f5841f5f4a99d9d0029",
+  "deployedBytecode": "0x60806040520000a165627a7a72305820541804eb461322b71291e33b91d2c4079b753d761371e5c29f5841f5f4a99d9d0029",
+  "sourceMap": "25:42:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;25:42:0;;;;;;;",
+  "deployedSourceMap": "25:42:0:-;;;",
+  "source": "pragma solidity 0.4.24;\n\ncontract DevDao{\n  function() payable {}\n}\n",
   "sourcePath": "/Users/zacharymitton/Dropbox/zac_mitton/dev/ethereum/mirage/contracts/DevDao.sol",
   "ast": {
     "absolutePath": "/Users/zacharymitton/Dropbox/zac_mitton/dev/ethereum/mirage/contracts/DevDao.sol",
     "exportedSymbols": {
       "DevDao": [
-        5
+        6
       ]
     },
-    "id": 6,
+    "id": 7,
     "nodeType": "SourceUnit",
     "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5,
+        "id": 6,
         "linearizedBaseContracts": [
-          5
+          6
         ],
         "name": "DevDao",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3,
+              "id": 4,
               "nodeType": "Block",
-              "src": "38:2:0",
+              "src": "63:2:0",
               "statements": []
             },
             "documentation": null,
-            "id": 4,
+            "id": 5,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -52,63 +62,73 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "27:2:0"
-            },
-            "payable": true,
-            "returnParameters": {
               "id": 2,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "38:0:0"
+              "src": "52:2:0"
             },
-            "scope": 5,
-            "src": "19:21:0",
+            "payable": true,
+            "returnParameters": {
+              "id": 3,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "63:0:0"
+            },
+            "scope": 6,
+            "src": "44:21:0",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 6,
-        "src": "0:42:0"
+        "scope": 7,
+        "src": "25:42:0"
       }
     ],
-    "src": "0:43:0"
+    "src": "0:68:0"
   },
   "legacyAST": {
     "absolutePath": "/Users/zacharymitton/Dropbox/zac_mitton/dev/ethereum/mirage/contracts/DevDao.sol",
     "exportedSymbols": {
       "DevDao": [
-        5
+        6
       ]
     },
-    "id": 6,
+    "id": 7,
     "nodeType": "SourceUnit",
     "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
       {
         "baseContracts": [],
         "contractDependencies": [],
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 5,
+        "id": 6,
         "linearizedBaseContracts": [
-          5
+          6
         ],
         "name": "DevDao",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "body": {
-              "id": 3,
+              "id": 4,
               "nodeType": "Block",
-              "src": "38:2:0",
+              "src": "63:2:0",
               "statements": []
             },
             "documentation": null,
-            "id": 4,
+            "id": 5,
             "implemented": true,
             "isConstructor": false,
             "isDeclaredConst": false,
@@ -116,30 +136,30 @@
             "name": "",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 1,
-              "nodeType": "ParameterList",
-              "parameters": [],
-              "src": "27:2:0"
-            },
-            "payable": true,
-            "returnParameters": {
               "id": 2,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "38:0:0"
+              "src": "52:2:0"
             },
-            "scope": 5,
-            "src": "19:21:0",
+            "payable": true,
+            "returnParameters": {
+              "id": 3,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "63:0:0"
+            },
+            "scope": 6,
+            "src": "44:21:0",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 6,
-        "src": "0:42:0"
+        "scope": 7,
+        "src": "25:42:0"
       }
     ],
-    "src": "0:43:0"
+    "src": "0:68:0"
   },
   "compiler": {
     "name": "solc",
@@ -147,5 +167,5 @@
   },
   "networks": {},
   "schemaVersion": "2.0.0",
-  "updatedAt": "2018-05-27T14:29:50.571Z"
+  "updatedAt": "2018-06-14T19:48:33.194Z"
 }
