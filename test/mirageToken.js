@@ -3,18 +3,19 @@ var MirageToken = artifacts.require("MirageToken");
 contract('MirageToken', function(accounts) {
   var inst // contract instance
   it("should compute the half life in seconds", function() {
-    return MirageToken.new({from: accounts[0]}).then((_inst) => {
-      inst = _inst
-      return inst.fracExp(1000000, 68245410, 73045000, 6)
-    }).then(function(output) {
-      console.log("output:", output, "\n", output.toNumber()/1000000);
+    // return MirageToken.new({from: accounts[0]}).then((_inst) => {
+    //   inst = _inst
+    //   return inst.fracExp(1000000, 68245410, 73045000, 6)
+    // }).then(function(output) {
+      // console.log("output:", output, "\n", output.toNumber()/1000000);
     //   return inst.fracExp.sendTransaction(1000000000, 68245410, 47304000, 250,{from: accounts[0], gas: 700000})
     // }).then(function(txHash) {
     //   console.log("txHash:", txHash);
     //   return web3.eth.getTransactionReceipt(txHash)
     // }).then(function(receipt) {
     //   console.log("receipt:", receipt)
-    });
+    // });
+    return 
   });
 
   // it("should compute all exponentials for the first 3 years without significant errors", function() {

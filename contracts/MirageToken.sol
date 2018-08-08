@@ -1,47 +1,51 @@
 pragma solidity 0.4.24;
 
 import "zeppelin-solidity/contracts/token/ERC827/ERC827Token.sol";
-// import "./Pow.sol";
 import "./DevDao.sol";
+import "./Bancor.sol";
 
 
-//all tokens expressed in elementary particles unless otherwise specified
+//tokens and ether expressed in elementary particles unless specified otherwise
 contract MirageToken is ERC827Token{
 
   DevDao      public devDao;
+  Bancor      public bancor;
   uint        public createdAt;
   uint        public totalSupply;
-  uint        public lastPrice_x_E6;
-  uint constant       public E6  = 1000000;
-  uint        public E9  = 1000000000;
-  uint        public E18 = 1000000000000000000;
-  uint        public E26 = 100000000000000000000000000;
+  uint        public lastSpotPrice_x_E6;
+  uint        public E6  = 1000000;
 
-  constructor(){
-    createdAt = now; // 1518567207 Feb 14 2018: Date of first meeting
-    lastPrice_x_E6 = 1000000;
+  constructor() public {
+    createdAt = now; // or 1518567207 Feb 14 2018: Date of first meeting
+    lastSpotPrice_x_E6 = 1000000;
     devDao = new DevDao();
-    // maybe deploy Mint and Pow library here
+    bancor = new Bancor();
   }
 
 
-  function skim() {
-    uint reserveRatio_x_E6 = fracExp(1000000, 68245410, timeSinceGenesis(), 6);
-    if(overfunded()){
-      uint excessReserves = this.balance - totalSupply * lastPrice_x_E6 / 1000000 * reserveRatio_x_E6 / 1000000;
-      devDao.transfer(excessReserves);
-    }else{ //underfunded
-      uint tokensToMint = totalSupply - this.balance * 1000000 * 1000000 / lastPrice_x_E6 / reserveRatio_x_E6;
-      totalSupply += tokensToMint;
-      balances[devDao] += tokensToMint;
-    }
+  function updateEthReserves() public {
+    // 1.0000000146530353805^-47304000 is 60874760069/60874759177 ^ 47304000/1
+    // if(overfunded()){
+    uint excessReserves = address(this).balance - totalSupply * lastSpotPrice_x_E6 / 1000000 * reserveRatio_x_E6() / 1000000;
+    address(devDao).transfer(excessReserves);
   }
-  function buy() payable {
-    skim();
+  // function updateDevTokens() public {
+  //       // }else{ //underfunded
+  //     // // note the difference found in price here might be due to the fact that
+  //     // // normally the money coming in is used to buy tokens *first* and then the
+  //     // // team funds are used to buy them second; Whereas here (underfunded case) the
+  //     // // team buys tokens, then the investors tokens are created.
+  //   // uint tokensToMint = totalSupply - address(this).balance * 1000000 * 1000000 / price_x_E6 / reserveRatio_x_E6;
+  //   // totalSupply += tokensToMint;
+  //   // balances[devDao] += tokensToMint;
+  //   // }
+  // }
+  function buy() public payable {
+    updateEthReserves();
     _buy();
   }
-  function sell(uint amount){
-    skim();
+  function sell(uint amount) public {
+    updateEthReserves();
     _sell(amount);
   }
 
@@ -49,62 +53,37 @@ contract MirageToken is ERC827Token{
     // require(totalSupply + msg.value >= totalSupply) // seems unnecessary
     //does this fail elegantly with sending wei and minting coins (4 cases)
     // uint tokensBought = msg.value / buyPriceTimesOneBillion(msg.value) / 1000000000;
-    uint tokensIssued = tokensToIssue(msg.value);
+    uint tokensIssued = bancor.calculatePurchaseReturn(totalSupply, address(this).balance, uint32(reserveRatio_x_E6()), msg.value);
     totalSupply += tokensIssued;
     balances[msg.sender] += tokensIssued;
+    _updateSpotPrice();
   }
-
   function _sell(uint tokensSold) private {
     require(balances[msg.sender] >= tokensSold);
-    uint weiRewarded = tokensSold * sellPrice_x_E6(tokensSold) / 1000000;
+    uint weiRewarded = bancor.calculateSaleReturn(totalSupply, address(this).balance, uint32(reserveRatio_x_E6()), tokensSold);
 
     totalSupply -= tokensSold;
     balances[msg.sender] -= tokensSold;
     msg.sender.transfer(weiRewarded);
+    _updateSpotPrice();
+  }
+  function _updateSpotPrice() private {
+    lastSpotPrice_x_E6 = address(this).balance / totalSupply * E6 / reserveRatio_x_E6();
   }
 
-  // = H3*((1+F4/E4)^(B4)-1)
-  // = 
-  // do this from directions - and logically check later
-  //low balance=E1 weiPaym=E26  1 + E26 => significant raise
-  //high balcnce=E26 weiPaym=E1: 1 + 1/E26 => should still raise price slightly
-  function tokensToIssue(uint weiPayment) view returns(uint){
-    uint term1_x_E26 = E26 + E26 * weiPayment / this.balance;
-    //could be 1 - E52
-    uint term2_x_E6  = fracExp(E18, term1_x_E26, now - createdAt , 6); //check all this shit
-    // totalSupply * finish this line!!!
-    return 5; //stub stubly
+  function reserveRatio_x_E6() view public returns(uint){
+    // find a way to cache this better. currently 3 calls in each buy() call
+    // updates are only 5000 gas, seems easy enough? "lastreserveRatio_x_E6" so 
+    // people dont try to read is as current.
+    (uint256 estimate, uint256 precision) = bancor.power(60874760069, 60874759177, uint32(now - createdAt), 1);
+    return estimate * E6 / 2**precision; //shouldnt overflow...
   }
-
-  // function buyPriceTimesOneBillion(uint weiAmount) view returns(uint){
-  //   return 101;
+  // function priceToBuy_x_E6(uint ETH) view public returns(uint){
+  //   return address(this).balance / totalSupply * E6 / reserveRatio_x_E6();
   // }
-
-  function sellPrice_x_E6(uint tokenAmount) view returns(uint){
-    return 99;
-  }
-
-  function timeSinceGenesis() view returns(uint){
-    return now - createdAt;
-  }
-
-  function overfunded() view returns(bool){
-    //more than target at current time
-    return now % 2 == 0 ? false : true; // stub
-  }
-
-  // ex: 1000000, 68245410, 47304000, 6
-  function fracExp(uint k, uint q, uint n, uint p) pure returns (uint) {
-    uint s = 0;
-    uint N = 1;
-    uint B = 1;
-    for (uint i = 0; i < p; ++i){
-      s += k * N / B / (q**i);
-      N  = N * (n-i);
-      B  = B * (i+1);
-    }
-    return k * k / s;
-  }
+  // function priceToSell_x_E6(uint tokens) view public returns(uint){
+  //   return address(this).balance / totalSupply * E6 / reserveRatio_x_E6();
+  // }
 }
 
 

@@ -1,6 +1,6 @@
 pragma solidity ^0.4.21;
 
-contract BancorFormula {
+contract Bancor {
 
     string public version = '0.3';
 
@@ -237,38 +237,6 @@ contract BancorFormula {
     }
 
     /**
-        @dev given two connector balances/weights and a sell amount (in the first connector token),
-        calculates the return for a conversion from the first connector token to the second connector token (in the second connector token)
-
-        Formula:
-        Return = _toConnectorBalance * (1 - (_fromConnectorBalance / (_fromConnectorBalance + _amount)) ^ (_fromConnectorWeight / _toConnectorWeight))
-
-        @param _fromConnectorBalance    input connector balance
-        @param _fromConnectorWeight     input connector weight, represented in ppm, 1-1000000
-        @param _toConnectorBalance      output connector balance
-        @param _toConnectorWeight       output connector weight, represented in ppm, 1-1000000
-        @param _amount                  input connector amount
-
-        @return second connector amount
-    */
-    function calculateCrossConnectorReturn(uint256 _fromConnectorBalance, uint32 _fromConnectorWeight, uint256 _toConnectorBalance, uint32 _toConnectorWeight, uint256 _amount) public view returns (uint256) {
-        // validate input
-        require(_fromConnectorBalance > 0 && _fromConnectorWeight > 0 && _fromConnectorWeight <= MAX_WEIGHT && _toConnectorBalance > 0 && _toConnectorWeight > 0 && _toConnectorWeight <= MAX_WEIGHT);
-
-        // special case for equal weights
-        if (_fromConnectorWeight == _toConnectorWeight)
-            return safeMul(_toConnectorBalance, _amount) / safeAdd(_fromConnectorBalance, _amount);
-
-        uint256 result;
-        uint8 precision;
-        uint256 baseN = safeAdd(_fromConnectorBalance, _amount);
-        (result, precision) = power(baseN, _fromConnectorBalance, _fromConnectorWeight, _toConnectorWeight);
-        uint256 temp1 = safeMul(_toConnectorBalance, result);
-        uint256 temp2 = _toConnectorBalance << precision;
-        return (temp1 - temp2) / result;
-    }
-
-    /**
         General Description:
             Determine a value of precision.
             Calculate an integer approximation of (_baseN / _baseD) ^ (_expN / _expD) * 2 ^ precision.
@@ -285,7 +253,7 @@ contract BancorFormula {
             This allows us to compute "base ^ exp" with maximum accuracy and without exceeding 256 bits in any of the intermediate computations.
             This functions assumes that "_expN < 2 ^ 256 / log(MAX_NUM - 1)", otherwise the multiplication should be replaced with a "safeMul".
     */
-    function power(uint256 _baseN, uint256 _baseD, uint32 _expN, uint32 _expD) internal view returns (uint256, uint8) {
+    function power(uint256 _baseN, uint256 _baseD, uint32 _expN, uint32 _expD) public view returns (uint256, uint8) {
         assert(_baseN < MAX_NUM);
 
         uint256 baseLog;
@@ -311,7 +279,7 @@ contract BancorFormula {
         Compute log(x / FIXED_1) * FIXED_1.
         This functions assumes that "x >= FIXED_1", because the output would be negative otherwise.
     */
-    function generalLog(uint256 x) internal pure returns (uint256) {
+    function generalLog(uint256 x) public pure returns (uint256) {
         uint256 res = 0;
 
         // If x >= 2, then we compute the integer part of log2(x), which is larger than 0.
@@ -338,7 +306,7 @@ contract BancorFormula {
     /**
         Compute the largest integer smaller than or equal to the binary logarithm of the input.
     */
-    function floorLog2(uint256 _n) internal pure returns (uint8) {
+    function floorLog2(uint256 _n) public pure returns (uint8) {
         uint8 res = 0;
 
         if (_n < 256) {
@@ -366,7 +334,7 @@ contract BancorFormula {
         - This function finds the position of [the smallest value in "maxExpArray" larger than or equal to "x"]
         - This function finds the highest position of [a value in "maxExpArray" larger than or equal to "x"]
     */
-    function findPositionInMaxExpArray(uint256 _x) internal view returns (uint8) {
+    function findPositionInMaxExpArray(uint256 _x) public view returns (uint8) {
         uint8 lo = MIN_PRECISION;
         uint8 hi = MAX_PRECISION;
 
@@ -394,7 +362,7 @@ contract BancorFormula {
         The global "maxExpArray" maps each "precision" to "((maximumExponent + 1) << (MAX_PRECISION - precision)) - 1".
         The maximum permitted value for "x" is therefore given by "maxExpArray[precision] >> (MAX_PRECISION - precision)".
     */
-    function generalExp(uint256 _x, uint8 _precision) internal pure returns (uint256) {
+    function generalExp(uint256 _x, uint8 _precision) public pure returns (uint256) {
         uint256 xi = _x;
         uint256 res = 0;
 
@@ -439,7 +407,7 @@ contract BancorFormula {
         Input range: FIXED_1 <= x <= LOG_EXP_MAX_VAL - 1
         Auto-generated via 'PrintFunctionOptimalLog.py'
     */
-    function optimalLog(uint256 x) internal pure returns (uint256) {
+    function optimalLog(uint256 x) public pure returns (uint256) {
         uint256 res = 0;
 
         uint256 y;
@@ -474,7 +442,7 @@ contract BancorFormula {
         Input range: 0 <= x <= OPT_EXP_MAX_VAL - 1
         Auto-generated via 'PrintFunctionOptimalExp.py'
     */
-    function optimalExp(uint256 x) internal pure returns (uint256) {
+    function optimalExp(uint256 x) public pure returns (uint256) {
         uint256 res = 0;
 
         uint256 y;
@@ -514,16 +482,13 @@ contract BancorFormula {
     }
 
 //safeMath
-    function safeAdd(uint256 _x, uint256 _y) internal pure returns (uint256) {
+    function safeAdd(uint256 _x, uint256 _y) public pure returns (uint256) {
         uint256 z = _x + _y;
         assert(z >= _x);
         return z;
     }
-    // function safeSub(uint256 _x, uint256 _y) internal pure returns (uint256) {
-    //     assert(_x >= _y);
-    //     return _x - _y;
-    // }
-    function safeMul(uint256 _x, uint256 _y) internal pure returns (uint256) {
+
+    function safeMul(uint256 _x, uint256 _y) public pure returns (uint256) {
         uint256 z = _x * _y;
         assert(_x == 0 || z / _x == _y);
         return z;
