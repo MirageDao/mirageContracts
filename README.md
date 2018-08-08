@@ -1,2 +1,2 @@
-### The Continuous Liquid Token Model
+### Exponential Decay Token Release Schedule
 
