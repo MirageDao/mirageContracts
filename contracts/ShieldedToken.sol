@@ -1,24 +1,32 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 
 import "zeppelin-solidity/contracts/token/ERC827/ERC827Token.sol";
-// import "./Collective.sol";
 import "./GnosisWallet.sol";
 import "./Bancor.sol";
+import "./shieldLogic.sol";
 
 //tokens and ether expressed in elementary particles unless specified otherwise
 contract MirageToken is ERC827Token{
 
   address public collective;
-  Bancor public bancor;
-  uint   public createdAt;
-  uint   public totalSupply;
-  uint   public constant E18 = 1000000000000000000;
+  address public shieldLogic;
+  Bancor  public bancor;
+  uint    public createdAt;
+  uint    public totalSupply;
+  uint    constant E18 = 1000000000000000000;
 
-  constructor(address _collective) public {
+  constructor(address _collective, address _bancor) public {
     createdAt = now; // or 1518567207 Feb 14 2018: Date of first meeting
     collective = _collective;
-    bancor = new Bancor();
+    bancor = Bancor(_bancor);
   }
+
+
+  // function () payable{
+  //   shieldLogic.call.value(msg.value)(data);
+  // //   //use a forward to upgrade and extend contract interface
+  // //   revert("not yet available");
+  // }
 
   modifier onlyCollective(){ if (msg.sender == collective) _; }
 
@@ -31,15 +39,20 @@ contract MirageToken is ERC827Token{
     balances[collective] += newSupply;
   }
 
-  address shieldLogic;
   function shield(uint value, bytes data) payable{
-    approve(value, shieldLogic)//check order
-    shieldLogic.call.value(msg.value)(data)
+    approve(shieldLogic, value);
+    shieldLogic.call.value(msg.value)(data);
   }
 
-  function unshield(bytes data){
-    shieldLogic.call.value(msg.value)(data)
+  function unshield(bytes data) payable{
+    shieldLogic.call.value(msg.value)(data);
   }
+
+  // function shieldedTransfer(bytes data) payable{
+  //   shieldLogic.call.value(msg.value)(data);
+  //  // to keep with past ERC20 tokens, shieldedTx doesnt have to be on 
+  //  // the token. It wont be for the others so might as well not be here.
+  // }
 
   function momentarySupply() view public returns(uint){
     (uint256 estimate, uint256 precision) = bancor.power(67167592423, 67167592054, uint32(now - createdAt), 1);
@@ -51,38 +64,6 @@ contract MirageToken is ERC827Token{
     return (21000000 - unmined - 1) * E18; // -1 so it  is always rounded down
   }
 }
-
-contract shieldLogic
-  MirageToken mirage;
-  Collective collective;
-  modifier onlyCollective(){ if (msg.sender == collective) _; }
-
-  // function () {
-
-  // }
-
-  function shield(bytes data) payable{
-    revert("not yet available");
-  }
-
-  function unshield(bytes data) payable{
-    revert;
-  }
-
-  // function shield(bytes data) payable{
-  //   mirage.transferFrom(from, address(this), value);
-  // }
-
-  // function unshield(bytes data) payable{
-  //   if(proofIsCorrect){
-  //     mirage.transfer(to, value)
-  //   }
-  // }
-
-  // function upgrade() onlyCollective{
-  //   tran
-  // }
-  // this version doesnt need upgrade path for transfering deposits, because it doesnt take any
 
 
 
